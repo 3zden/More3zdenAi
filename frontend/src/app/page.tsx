@@ -155,7 +155,7 @@ export default function Home() {
           </button>
         </div>
         <p className="text-center text-xs text-gray-600 mt-2">
-          Answers are grounded in AZzeddine's actual portfolio data via RAG
+          Answers are grounded in Azzeddine's actual portfolio data via RAG
         </p>
       </footer>
     </div>
