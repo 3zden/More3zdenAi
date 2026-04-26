@@ -6,8 +6,9 @@
 set -e
 
 OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2}
+OLLAMA_START_TIMEOUT=${OLLAMA_START_TIMEOUT:-300}
 
-echo "🚀 Starting More3zdenAI..."
+echo "Starting More3zdenAI..."
 
 # 1. Copy .env if not present
 if [ ! -f .env ]; then
@@ -21,9 +22,17 @@ docker compose up -d --build db redis ollama
 
 # 3. Wait for Ollama to be ready
 echo "⏳ Waiting for Ollama to start..."
-until docker compose exec ollama curl -sf http://localhost:11434/api/tags > /dev/null 2>&1; do
+elapsed=0
+until docker compose exec -T ollama ollama list > /dev/null 2>&1; do
   sleep 3
+  elapsed=$((elapsed + 3))
   echo "  still waiting..."
+
+  if [ "$elapsed" -ge "$OLLAMA_START_TIMEOUT" ]; then
+    echo "❌ Ollama did not become ready within ${OLLAMA_START_TIMEOUT}s"
+    echo "   Check logs: docker compose logs --tail=100 ollama"
+    exit 1
+  fi
 done
 echo "✅ Ollama is ready"
 
